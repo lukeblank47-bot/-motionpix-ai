@@ -1,0 +1,29 @@
+{
+
+  "name": "motionpix-ai",
+
+  "version": "1.0.0",
+
+  "private": true,
+
+  "scripts": {
+
+    "dev": "vite",
+
+    "build": "vite",
+
+    "preview": "vite preview"
+
+  },
+
+  "dependencies": {
+
+    "react": "latest",
+
+    "react-dom": "latest",
+
+    "vite": "latest"
+
+  },
+
+  "devDependencies": {}
