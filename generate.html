@@ -12,115 +12,205 @@
 
   <style>
 
+    * {
+
+      box-sizing: border-box;
+
+    }
+
     body {
 
       margin: 0;
 
-      font-family: Arial, sans-serif;
+      min-height: 100vh;
 
-      background: #0f172a;
+      font-family: Arial, Helvetica, sans-serif;
 
       color: white;
 
-      text-align: center;
+      background:
+
+        radial-gradient(circle at top, #28104a 0%, #100719 45%, #050507 100%);
 
     }
 
     .container {
 
+      width: 90%;
+
       max-width: 700px;
 
-      margin: auto;
+      margin: 0 auto;
 
-      padding: 50px 20px;
+      padding: 60px 0;
 
     }
 
     h1 {
 
-      font-size: 42px;
+      text-align: center;
+
+      font-size: 46px;
 
       margin-bottom: 10px;
 
     }
 
-    .blue {
+    h1 span {
 
-      color: #38bdf8;
+      color: #a855f7;
 
     }
 
-    p {
+    .subtitle {
 
-      color: #cbd5e1;
+      text-align: center;
 
-      font-size: 18px;
+      color: #bcb4c7;
+
+      font-size: 17px;
+
+      margin-bottom: 35px;
+
+    }
+
+    .generator-box {
+
+      background: rgba(17, 12, 24, 0.95);
+
+      border: 1px solid #392b48;
+
+      border-radius: 22px;
+
+      padding: 25px;
+
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+
+    }
+
+    label {
+
+      display: block;
+
+      font-size: 16px;
+
+      font-weight: bold;
+
+      margin-bottom: 10px;
 
     }
 
     textarea {
 
-      width: 90%;
+      width: 100%;
 
-      height: 140px;
+      height: 150px;
 
-      margin-top: 30px;
+      padding: 16px;
 
-      padding: 15px;
+      background: #09070d;
 
-      border-radius: 12px;
+      color: white;
 
-      font-size: 17px;
+      border: 1px solid #453653;
+
+      border-radius: 14px;
+
+      font-size: 16px;
+
+      resize: vertical;
+
+      outline: none;
+
+      margin-bottom: 18px;
+
+    }
+
+    textarea:focus {
+
+      border-color: #a855f7;
 
     }
 
     select {
 
-      width: 95%;
+      width: 100%;
 
       padding: 15px;
 
-      margin-top: 15px;
+      background: #09070d;
 
-      border-radius: 12px;
+      color: white;
 
-      font-size: 17px;
+      border: 1px solid #453653;
+
+      border-radius: 14px;
+
+      font-size: 16px;
+
+      margin-bottom: 18px;
+
+      outline: none;
 
     }
 
     button {
 
-      width: 95%;
+      width: 100%;
 
-      padding: 18px;
-
-      margin-top: 20px;
+      padding: 16px;
 
       border: none;
 
-      border-radius: 12px;
+      border-radius: 14px;
 
-      background: #38bdf8;
+      color: white;
 
-      font-size: 20px;
+      font-size: 18px;
 
       font-weight: bold;
 
       cursor: pointer;
 
+      background: linear-gradient(90deg, #7c3aed, #c026d3);
+
+    }
+
+    button:disabled {
+
+      opacity: 0.6;
+
     }
 
     #result {
 
-      margin-top: 25px;
+      display: none;
 
-      padding: 20px;
+      margin-top: 22px;
 
-      background: #1e293b;
+      padding: 18px;
+
+      background: #09070d;
+
+      border: 1px solid #392b48;
+
+      border-radius: 14px;
+
+      text-align: center;
+
+      overflow: hidden;
+
+    }
+
+    #result img,
+
+    #result video {
+
+      display: block;
+
+      width: 100%;
 
       border-radius: 12px;
-
-      display: none;
 
     }
 
@@ -132,43 +222,77 @@
 
   <div class="container">
 
-    <h1>MotionPix <span class="blue">AI</span></h1>
+    <h1>MotionPix <span>AI</span></h1>
 
-    <h2>Create with AI</h2>
+    <p class="subtitle">
 
-    <p>Describe what you want MotionPix AI to create.</p>
+      Turn your imagination into AI images and videos.
 
-    <textarea
+    </p>
 
-      id="prompt"
+    <div class="generator-box">
 
-      placeholder="Example: Create a cinematic video of a futuristic city at night..."
+      <label for="prompt">
 
-    ></textarea>
+        What do you want to create?
 
-    <select id="type">
+      </label>
 
-      <option value="image">Generate AI Image</option>
+      <textarea
 
-      <option value="video">Generate AI Video</option>
+        id="prompt"
 
-    </select>
+        placeholder="Example: Create a cinematic video of a futuristic city at night"
 
-    <button onclick="generate()">✨ Generate</button>
+      ></textarea>
 
-    <div id="result"></div>
+      <select id="type">
+
+        <option value="image">
+
+          Generate AI Image
+
+        </option>
+
+        <option value="video">
+
+          Generate AI Video
+
+        </option>
+
+      </select>
+
+      <button id="generateButton" onclick="generate()">
+
+        ✨ Generate
+
+      </button>
+
+      <div id="result"></div>
+
+    </div>
 
   </div>
 
   <script>
 
- async   function generate() {
+    async function generate() {
 
-      const prompt = document.getElementById("prompt").value;
+      const prompt =
 
-      const type = document.getElementById("type").value;
+        document.getElementById("prompt").value;
 
-      const result = document.getElementById("result");
+      const type =
+
+        document.getElementById("type").value;
+
+      const result =
+
+        document.getElementById("result");
+
+      const button =
+
+        document.getElementById("generateButton");
 
       if (!prompt.trim()) {
 
@@ -182,13 +306,115 @@
 
       result.innerHTML =
 
-        "✨ MotionPix AI is ready to generate your " +
+        "✨ MotionPix AI is creating your " +
 
         type +
 
-        ".<br><br><strong>Your prompt:</strong><br>" +
+        "...<br><br>Please wait.";
 
-        prompt;
+      button.disabled = true;
+
+      button.textContent = "✨ Creating...";
+
+      try {
+
+        const endpoint =
+
+          type === "video"
+
+            ? "/api/generate-video"
+
+            : "/api/generate-image";
+
+        const response = await fetch(endpoint, {
+
+          method: "POST",
+
+          headers: {
+
+            "Content-Type": "application/json"
+
+          },
+
+          body: JSON.stringify({
+
+            prompt: prompt
+
+          })
+
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+
+          throw new Error(
+
+            data.error || "Generation failed"
+
+          );
+
+        }
+
+        if (!data.url) {
+
+          throw new Error(
+
+            "No generated file was returned."
+
+          );
+
+        }
+
+        result.innerHTML = "";
+
+        if (type === "video") {
+
+          const video =
+
+            document.createElement("video");
+
+          video.src = data.url;
+
+          video.controls = true;
+
+          video.autoplay = true;
+
+          video.playsInline = true;
+
+          result.appendChild(video);
+
+        } else {
+
+          const image =
+
+            document.createElement("img");
+
+          image.src = data.url;
+
+          image.alt =
+
+            "MotionPix AI generated image";
+
+          result.appendChild(image);
+
+        }
+
+      } catch (error) {
+
+        result.innerHTML =
+
+          "❌ Something went wrong: " +
+
+          error.message;
+
+      } finally {
+
+        button.disabled = false;
+
+        button.textContent = "✨ Generate";
+
+      }
 
     }
 
