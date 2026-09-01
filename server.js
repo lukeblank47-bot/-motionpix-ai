@@ -372,32 +372,15 @@ app.post("/api/image-to-video", async (req, res) => {
 
 ${originalPrompt}
 
-Preserve the exact appearance, shape, proportions, color and details of the subject in the source image.
+Create a realistic 5-second live-action video.
 
-Create photorealistic live-action footage with realistic physical movement.
+Keep the subject exactly the same.
 
-Keep the subject consistent and stable throughout the entire shot.
+Use natural movement, lighting, shadows and camera motion.
 
-Use natural acceleration and realistic wheel, body and environmental motion when applicable.
-
-The background should move with correct perspective and parallax.
-
-Natural sunlight, physically realistic shadows and reflections.
-
-Smooth professional tracking camera movement with subtle natural camera motion.
-
-Maintain realistic depth of field and photographic detail.
-
-Do not redesign the subject.
-
-Do not change its shape or color.
-
-Avoid morphing, warping, flickering, floating, sliding or rubbery motion.
-
-Avoid artificial CGI-looking movement.
+Avoid warping, morphing, flickering or CGI-looking movement.
 
 `.trim();
-
     const task = await runwayRequest("image_to_video", {
 
       model: "gen4.5",
