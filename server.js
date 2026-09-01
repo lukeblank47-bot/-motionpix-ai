@@ -6,7 +6,7 @@ const app = express();
 
 const PORT = process.env.PORT || 3000;
 
-app.use(express.json());
+app.use(express.json({ limit: "2mb" }));
 
 app.use(express.static(__dirname));
 
@@ -21,8 +21,6 @@ app.get("/generate", (req, res) => {
   res.sendFile(path.join(__dirname, "generate.html"));
 
 });
-
-// Runway request helper
 
 async function runwayRequest(endpoint, body) {
 
@@ -54,15 +52,21 @@ async function runwayRequest(endpoint, body) {
 
   if (!response.ok) {
 
-    throw new Error(data.error || data.message || "Runway request failed");
+    throw new Error(
+
+      data.error ||
+
+      data.message ||
+
+      "Runway request failed"
+
+    );
 
   }
 
   return data;
 
 }
-
-// Wait until Runway finishes generating
 
 async function waitForTask(taskId) {
 
@@ -98,7 +102,11 @@ async function waitForTask(taskId) {
 
     if (task.status === "FAILED") {
 
-      throw new Error(task.failure || "Generation failed");
+      throw new Error(
+
+        task.failure || "Generation failed"
+
+      );
 
     }
 
@@ -106,7 +114,27 @@ async function waitForTask(taskId) {
 
 }
 
-// Generate an AI image
+function makePhotoRealistic(prompt) {
+
+  return `${prompt}. Photorealistic professional photography,
+
+physically accurate proportions and geometry,
+
+authentic real-world materials and textures,
+
+natural lighting, realistic reflections and shadows,
+
+real camera optics, fine surface detail,
+
+believable depth, true-to-life colors,
+
+high-end professional photography,
+
+no illustration, no cartoon,
+
+no CGI appearance, no 3D-render appearance.`;
+
+}
 
 app.post("/api/generate-image", async (req, res) => {
 
@@ -114,21 +142,35 @@ app.post("/api/generate-image", async (req, res) => {
 
     const { prompt } = req.body;
 
-    if (!prompt) {
+    if (!prompt || !prompt.trim()) {
 
-      return res.status(400).json({ error: "Prompt is required" });
+      return res.status(400).json({
+
+        error: "Prompt is required"
+
+      });
 
     }
 
-    const task = await runwayRequest("text_to_image", {
+    const task = await runwayRequest(
 
-      model: "gen4_image",
+      "text_to_image",
 
-      promptText: prompt,
+      {
 
-      ratio: "1280:720"
+        model: "gen4_image",
 
-    });
+        promptText: makePhotoRealistic(
+
+          prompt.trim()
+
+        ),
+
+        ratio: "1280:720"
+
+      }
+
+    );
 
     const result = await waitForTask(task.id);
 
@@ -144,7 +186,11 @@ app.post("/api/generate-image", async (req, res) => {
 
     res.status(500).json({
 
-      error: error.message || "Image generation failed"
+      error:
+
+        error.message ||
+
+        "Image generation failed"
 
     });
 
@@ -152,31 +198,69 @@ app.post("/api/generate-image", async (req, res) => {
 
 });
 
-// Generate an AI video
-
 app.post("/api/generate-video", async (req, res) => {
 
   try {
 
-    const { prompt } = req.body;
+    const { prompt, imageUrl } = req.body;
 
-    if (!prompt) {
+    if (!prompt || !prompt.trim()) {
 
-      return res.status(400).json({ error: "Prompt is required" });
+      return res.status(400).json({
+
+        error: "Prompt is required"
+
+      });
 
     }
 
-    const task = await runwayRequest("text_to_video", {
+    const body = {
 
       model: "gen4.5",
 
-      promptText: prompt,
+      promptText: `${prompt.trim()}.
+
+Natural physically believable movement,
+
+realistic camera movement,
+
+stable object geometry,
+
+consistent fine details between frames,
+
+cinematic live-action footage,
+
+realistic lighting and reflections,
+
+natural motion blur,
+
+no morphing,
+
+no warping,
+
+no cartoon appearance,
+
+no CGI appearance.`,
 
       ratio: "1280:720",
 
       duration: 5
 
-    });
+    };
+
+    if (imageUrl) {
+
+      body.promptImage = imageUrl;
+
+    }
+
+    const task = await runwayRequest(
+
+      "image_to_video",
+
+      body
+
+    );
 
     const result = await waitForTask(task.id);
 
@@ -192,7 +276,11 @@ app.post("/api/generate-video", async (req, res) => {
 
     res.status(500).json({
 
-      error: error.message || "Video generation failed"
+      error:
+
+        error.message ||
+
+        "Video generation failed"
 
     });
 
@@ -202,6 +290,10 @@ app.post("/api/generate-video", async (req, res) => {
 
 app.listen(PORT, () => {
 
-  console.log(`MotionPix AI is running on port ${PORT}`);
+  console.log(
+
+    `MotionPix AI is running on port ${PORT}`
+
+  );
 
 });
