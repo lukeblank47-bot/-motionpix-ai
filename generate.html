@@ -4,421 +4,511 @@
 
 <head>
 
-  <meta charset="UTF-8">
+<meta charset="UTF-8">
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>MotionPix AI Generator</title>
+<title>MotionPix AI Generator</title>
 
-  <style>
+<style>
 
-    * {
+* {
 
-      box-sizing: border-box;
+  box-sizing: border-box;
 
-    }
+}
 
-    body {
+body {
 
-      margin: 0;
+  margin: 0;
 
-      min-height: 100vh;
+  min-height: 100vh;
 
-      font-family: Arial, Helvetica, sans-serif;
+  font-family: Arial, sans-serif;
 
-      color: white;
+  background:
 
-      background:
+    radial-gradient(circle at top, #32105c 0%, #12051f 35%, #07030c 75%);
 
-        radial-gradient(circle at top, #28104a 0%, #100719 45%, #050507 100%);
+  color: white;
 
-    }
+}
 
-    .container {
+.page {
 
-      width: 90%;
+  width: min(92%, 760px);
 
-      max-width: 700px;
+  margin: auto;
 
-      margin: 0 auto;
+  padding: 45px 0 80px;
 
-      padding: 60px 0;
+}
 
-    }
+.logo {
 
-    h1 {
+  text-align: center;
 
-      text-align: center;
+  font-size: 42px;
 
-      font-size: 46px;
+  font-weight: 900;
 
-      margin-bottom: 10px;
+  margin-bottom: 8px;
 
-    }
+}
 
-    h1 span {
+.logo span {
 
-      color: #a855f7;
+  color: #c33cff;
 
-    }
+}
 
-    .subtitle {
+.subtitle {
 
-      text-align: center;
+  text-align: center;
 
-      color: #bcb4c7;
+  color: #c8bfd2;
 
-      font-size: 17px;
+  font-size: 17px;
 
-      margin-bottom: 35px;
+  margin-bottom: 35px;
 
-    }
+}
 
-    .generator-box {
+.card {
 
-      background: rgba(17, 12, 24, 0.95);
+  background: rgba(17, 8, 28, .92);
 
-      border: 1px solid #392b48;
+  border: 1px solid #56306f;
 
-      border-radius: 22px;
+  border-radius: 24px;
 
-      padding: 25px;
+  padding: 22px;
 
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 20px 60px rgba(0,0,0,.35);
 
-    }
+}
 
-    label {
+label {
 
-      display: block;
+  display: block;
 
-      font-size: 16px;
+  font-weight: 700;
 
-      font-weight: bold;
+  margin-bottom: 10px;
 
-      margin-bottom: 10px;
+}
 
-    }
+textarea {
 
-    textarea {
+  width: 100%;
 
-      width: 100%;
+  min-height: 145px;
 
-      height: 150px;
+  resize: vertical;
 
-      padding: 16px;
+  padding: 16px;
 
-      background: #09070d;
+  border-radius: 15px;
 
-      color: white;
+  border: 1px solid #65427d;
 
-      border: 1px solid #453653;
+  background: #0d0714;
 
-      border-radius: 14px;
+  color: white;
 
-      font-size: 16px;
+  font-size: 16px;
 
-      resize: vertical;
+  outline: none;
 
-      outline: none;
+}
 
-      margin-bottom: 18px;
+select {
 
-    }
+  width: 100%;
 
-    textarea:focus {
+  margin-top: 15px;
 
-      border-color: #a855f7;
+  padding: 15px;
 
-    }
+  border-radius: 14px;
 
-    select {
+  border: 1px solid #65427d;
 
-      width: 100%;
+  background: #0d0714;
 
-      padding: 15px;
+  color: white;
 
-      background: #09070d;
+  font-size: 16px;
 
-      color: white;
+}
 
-      border: 1px solid #453653;
+button {
 
-      border-radius: 14px;
+  width: 100%;
 
-      font-size: 16px;
+  margin-top: 16px;
 
-      margin-bottom: 18px;
+  padding: 17px;
 
-      outline: none;
+  border: 0;
 
-    }
+  border-radius: 15px;
 
-    button {
+  color: white;
 
-      width: 100%;
+  font-size: 19px;
 
-      padding: 16px;
+  font-weight: 800;
 
-      border: none;
+  cursor: pointer;
 
-      border-radius: 14px;
+  background: linear-gradient(90deg, #7c32ff, #d421d9);
 
-      color: white;
+}
 
-      font-size: 18px;
+button:disabled {
 
-      font-weight: bold;
+  opacity: .55;
 
-      cursor: pointer;
+}
 
-      background: linear-gradient(90deg, #7c3aed, #c026d3);
+.secondary {
 
-    }
+  background: linear-gradient(90deg, #5a20c8, #8c28ff);
 
-    button:disabled {
+}
 
-      opacity: 0.6;
+#result {
 
-    }
+  display: none;
 
-    #result {
+  margin-top: 22px;
 
-      display: none;
+  padding: 14px;
 
-      margin-top: 22px;
+  border: 1px solid #4c315d;
 
-      padding: 18px;
+  border-radius: 18px;
 
-      background: #09070d;
+  background: #09040e;
 
-      border: 1px solid #392b48;
+  text-align: center;
 
-      border-radius: 14px;
+}
 
-      text-align: center;
+#result img,
 
-      overflow: hidden;
+#result video {
 
-    }
+  display: block;
 
-    #result img,
+  width: 100%;
 
-    #result video {
+  border-radius: 15px;
 
-      display: block;
+}
 
-      width: 100%;
+#videoButton {
 
-      border-radius: 12px;
+  display: none;
 
-    }
+}
 
-  </style>
+.status {
+
+  padding: 22px 10px;
+
+  color: #d9cce2;
+
+  line-height: 1.5;
+
+}
+
+</style>
 
 </head>
 
 <body>
 
-  <div class="container">
+<div class="page">
 
-    <h1>MotionPix <span>AI</span></h1>
+  <div class="logo">MotionPix <span>AI</span></div>
 
-    <p class="subtitle">
+  <div class="subtitle">
 
-      Turn your imagination into AI images and videos.
-
-    </p>
-
-    <div class="generator-box">
-
-      <label for="prompt">
-
-        What do you want to create?
-
-      </label>
-
-      <textarea
-
-        id="prompt"
-
-        placeholder="Example: Create a cinematic video of a futuristic city at night"
-
-      ></textarea>
-
-      <select id="type">
-
-        <option value="image">
-
-          Generate AI Image
-
-        </option>
-
-        <option value="video">
-
-          Generate AI Video
-
-        </option>
-
-      </select>
-
-      <button id="generateButton" onclick="generate()">
-
-        ✨ Generate
-
-      </button>
-
-      <div id="result"></div>
-
-    </div>
+    Create realistic AI images and turn your best image into video.
 
   </div>
 
-  <script>
+  <div class="card">
 
-    async function generate() {
+    <label for="prompt">What do you want to create?</label>
 
-      const prompt =
+    <textarea
 
-        document.getElementById("prompt").value;
+      id="prompt"
 
-      const type =
+      placeholder="Example: A photorealistic purple supercar on a real city street at night"
 
-        document.getElementById("type").value;
+    ></textarea>
 
-      const result =
+    <select id="type">
 
-        document.getElementById("result");
+      <option value="image">Generate AI Image</option>
 
-      const button =
+      <option value="video">Generate AI Video</option>
 
-        document.getElementById("generateButton");
+    </select>
 
-      if (!prompt.trim()) {
+    <button id="generateButton" onclick="generate()">
 
-        alert("Tell MotionPix AI what you want to create.");
+      ✨ Generate
 
-        return;
+    </button>
 
-      }
+    <div id="result"></div>
 
-      result.style.display = "block";
+    <button
 
-      result.innerHTML =
+      id="videoButton"
 
-        "✨ MotionPix AI is creating your " +
+      class="secondary"
 
-        type +
+      onclick="turnImageIntoVideo()"
 
-        "...<br><br>Please wait.";
+    >
 
-      button.disabled = true;
+      🎬 Turn This Image Into Video
 
-      button.textContent = "✨ Creating...";
+    </button>
 
-      try {
+  </div>
 
-        const endpoint =
+</div>
 
-          type === "video"
+<script>
 
-            ? "/api/generate-video"
+let lastImageUrl = "";
 
-            : "/api/generate-image";
+async function requestGeneration(endpoint, body) {
 
-        const response = await fetch(endpoint, {
+  const response = await fetch(endpoint, {
 
-          method: "POST",
+    method: "POST",
 
-          headers: {
+    headers: {
 
-            "Content-Type": "application/json"
+      "Content-Type": "application/json"
 
-          },
+    },
 
-          body: JSON.stringify({
+    body: JSON.stringify(body)
 
-            prompt: prompt
+  });
 
-          })
+  const data = await response.json();
 
-        });
+  if (!response.ok) {
 
-        const data = await response.json();
+    throw new Error(data.error || "Generation failed");
 
-        if (!response.ok) {
+  }
 
-          throw new Error(
+  if (!data.url) {
 
-            data.error || "Generation failed"
+    throw new Error("No generated file was returned.");
 
-          );
+  }
 
-        }
+  return data.url;
 
-        if (!data.url) {
+}
 
-          throw new Error(
+function showStatus(message) {
 
-            "No generated file was returned."
+  const result = document.getElementById("result");
 
-          );
+  result.style.display = "block";
 
-        }
+  result.innerHTML =
 
-        result.innerHTML = "";
+    '<div class="status">' + message + "</div>";
 
-        if (type === "video") {
+}
 
-          const video =
+async function generate() {
 
-            document.createElement("video");
+  const prompt = document.getElementById("prompt").value.trim();
 
-          video.src = data.url;
+  const type = document.getElementById("type").value;
 
-          video.controls = true;
+  const button = document.getElementById("generateButton");
 
-          video.autoplay = true;
+  const videoButton = document.getElementById("videoButton");
 
-          video.playsInline = true;
+  if (!prompt) {
 
-          result.appendChild(video);
+    alert("Tell MotionPix AI what you want to create.");
 
-        } else {
+    return;
 
-          const image =
+  }
 
-            document.createElement("img");
+  button.disabled = true;
 
-          image.src = data.url;
+  videoButton.style.display = "none";
 
-          image.alt =
+  try {
 
-            "MotionPix AI generated image";
+    if (type === "image") {
 
-          result.appendChild(image);
+      button.textContent = "✨ Creating image...";
 
-        }
+      showStatus("✨ Creating your realistic AI image...");
 
-      } catch (error) {
+      const url = await requestGeneration(
 
-        result.innerHTML =
+        "/api/generate-image",
 
-          "❌ Something went wrong: " +
+        { prompt }
 
-          error.message;
+      );
 
-      } finally {
+      lastImageUrl = url;
 
-        button.disabled = false;
+      const result = document.getElementById("result");
 
-        button.textContent = "✨ Generate";
+      result.innerHTML = "";
 
-      }
+      const image = document.createElement("img");
+
+      image.src = url;
+
+      image.alt = "MotionPix AI generated image";
+
+      result.appendChild(image);
+
+      videoButton.style.display = "block";
+
+    } else {
+
+      button.textContent = "🎬 Creating video...";
+
+      showStatus("🎬 Creating your AI video... This may take a little while.");
+
+      const url = await requestGeneration(
+
+        "/api/generate-video",
+
+        { prompt }
+
+      );
+
+      showVideo(url);
 
     }
 
-  </script>
+  } catch (error) {
+
+    showStatus("❌ " + error.message);
+
+  } finally {
+
+    button.disabled = false;
+
+    button.textContent = "✨ Generate";
+
+  }
+
+}
+
+async function turnImageIntoVideo() {
+
+  const prompt = document.getElementById("prompt").value.trim();
+
+  const button = document.getElementById("videoButton");
+
+  if (!lastImageUrl) {
+
+    alert("Generate an image first.");
+
+    return;
+
+  }
+
+  button.disabled = true;
+
+  button.textContent = "🎬 Creating video...";
+
+  showStatus(
+
+    "🎬 Turning your image into a 5-second video..."
+
+  );
+
+  try {
+
+    const url = await requestGeneration(
+
+      "/api/generate-video",
+
+      {
+
+        prompt:
+
+          prompt +
+
+          ". Preserve the exact car design, proportions, colors and environment. Natural realistic movement and camera motion.",
+
+        imageUrl: lastImageUrl
+
+      }
+
+    );
+
+    showVideo(url);
+
+    button.style.display = "none";
+
+  } catch (error) {
+
+    showStatus("❌ " + error.message);
+
+    button.style.display = "block";
+
+  } finally {
+
+    button.disabled = false;
+
+    button.textContent = "🎬 Turn This Image Into Video";
+
+  }
+
+}
+
+function showVideo(url) {
+
+  const result = document.getElementById("result");
+
+  result.style.display = "block";
+
+  result.innerHTML = "";
+
+  const video = document.createElement("video");
+
+  video.src = url;
+
+  video.controls = true;
+
+  video.autoplay = true;
+
+  video.playsInline = true;
+
+  result.appendChild(video);
+
+}
+
+</script>
 
 </body>
 
