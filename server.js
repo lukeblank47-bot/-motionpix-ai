@@ -6,7 +6,7 @@ const app = express();
 
 const PORT = process.env.PORT || 3000;
 
-app.use(express.json({ limit: "2mb" }));
+app.use(express.json({ limit: "10mb" }));
 
 app.use(express.static(__dirname));
 
@@ -22,43 +22,49 @@ app.get("/generate", (req, res) => {
 
 });
 
+const RUNWAY_URL = "https://api.dev.runwayml.com/v1";
+
+const RUNWAY_VERSION = "2024-11-06";
+
 async function runwayRequest(endpoint, body) {
 
-  const response = await fetch(
+  if (!process.env.RUNWAYML_API_SECRET) {
 
-    `https://api.dev.runwayml.com/v1/${endpoint}`,
+    throw new Error("RUNWAYML_API_SECRET is missing in Render.");
 
-    {
+  }
 
-      method: "POST",
+  const response = await fetch(`${RUNWAY_URL}/${endpoint}`, {
 
-      headers: {
+    method: "POST",
 
-        Authorization: `Bearer ${process.env.RUNWAYML_API_SECRET}`,
+    headers: {
 
-        "Content-Type": "application/json",
+      "Content-Type": "application/json",
 
-        "X-Runway-Version": "2024-11-06"
+      Authorization: `Bearer ${process.env.RUNWAYML_API_SECRET}`,
 
-      },
+      "X-Runway-Version": RUNWAY_VERSION
 
-      body: JSON.stringify(body)
+    },
 
-    }
+    body: JSON.stringify(body)
 
-  );
+  });
 
   const data = await response.json();
 
   if (!response.ok) {
 
+    console.error("Runway error:", data);
+
     throw new Error(
 
-      data.error ||
+      data?.error ||
 
-      data.message ||
+      data?.message ||
 
-      "Runway request failed"
+      `Runway request failed (${response.status})`
 
     );
 
@@ -68,129 +74,157 @@ async function runwayRequest(endpoint, body) {
 
 }
 
-async function waitForTask(taskId) {
+async function getTask(taskId) {
 
-  while (true) {
+  const response = await fetch(`${RUNWAY_URL}/tasks/${taskId}`, {
 
-    await new Promise(resolve => setTimeout(resolve, 5000));
+    headers: {
 
-    const response = await fetch(
+      Authorization: `Bearer ${process.env.RUNWAYML_API_SECRET}`,
 
-      `https://api.dev.runwayml.com/v1/tasks/${taskId}`,
-
-      {
-
-        headers: {
-
-          Authorization: `Bearer ${process.env.RUNWAYML_API_SECRET}`,
-
-          "X-Runway-Version": "2024-11-06"
-
-        }
-
-      }
-
-    );
-
-    const task = await response.json();
-
-    if (task.status === "SUCCEEDED") {
-
-      return task;
+      "X-Runway-Version": RUNWAY_VERSION
 
     }
 
-    if (task.status === "FAILED") {
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+
+    throw new Error(
+
+      data?.error ||
+
+      data?.message ||
+
+      `Could not check task (${response.status})`
+
+    );
+
+  }
+
+  return data;
+
+}
+
+function sleep(ms) {
+
+  return new Promise(resolve => setTimeout(resolve, ms));
+
+}
+
+async function waitForTask(taskId) {
+
+  for (let i = 0; i < 120; i++) {
+
+    const task = await getTask(taskId);
+
+    console.log("Runway task:", task.status);
+
+    if (task.status === "SUCCEEDED") {
+
+      if (!task.output || !task.output[0]) {
+
+        throw new Error("Runway finished but returned no output.");
+
+      }
+
+      return task.output[0];
+
+    }
+
+    if (
+
+      task.status === "FAILED" ||
+
+      task.status === "CANCELED" ||
+
+      task.status === "CANCELLED"
+
+    ) {
 
       throw new Error(
 
-        task.failure || "Generation failed"
+        task.failure ||
+
+        task.failureCode ||
+
+        "Runway generation failed."
 
       );
 
     }
 
+    await sleep(3000);
+
   }
 
-}
-
-function makePhotoRealistic(prompt) {
-
-  return `${prompt}. Photorealistic professional photography,
-
-physically accurate proportions and geometry,
-
-authentic real-world materials and textures,
-
-natural lighting, realistic reflections and shadows,
-
-real camera optics, fine surface detail,
-
-believable depth, true-to-life colors,
-
-high-end professional photography,
-
-no illustration, no cartoon,
-
-no CGI appearance, no 3D-render appearance.`;
+  throw new Error("Generation took too long. Please try again.");
 
 }
+
+/*
+
+  IMAGE GENERATION
+
+*/
 
 app.post("/api/generate-image", async (req, res) => {
 
   try {
 
-    const { prompt } = req.body;
+    const prompt = String(
 
-    if (!prompt || !prompt.trim()) {
+      req.body.prompt ||
+
+      req.body.promptText ||
+
+      ""
+
+    ).trim();
+
+    if (!prompt) {
 
       return res.status(400).json({
 
-        error: "Prompt is required"
+        error: "Please enter a prompt."
 
       });
 
     }
 
-    const task = await runwayRequest(
+    const task = await runwayRequest("text_to_image", {
 
-      "text_to_image",
+      model: "gen4_image",
 
-      {
+      promptText: prompt,
 
-        model: "gen4_image",
+      ratio: "1920:1080"
 
-        promptText: makePhotoRealistic(
+    });
 
-          prompt.trim()
-
-        ),
-
-        ratio: "1280:720"
-
-      }
-
-    );
-
-    const result = await waitForTask(task.id);
+    const imageUrl = await waitForTask(task.id);
 
     res.json({
 
-      url: result.output?.[0]
+      success: true,
+
+      url: imageUrl,
+
+      imageUrl: imageUrl,
+
+      output: [imageUrl]
 
     });
 
   } catch (error) {
 
-    console.error(error);
+    console.error("Image generation error:", error);
 
     res.status(500).json({
 
-      error:
-
-        error.message ||
-
-        "Image generation failed"
+      error: error.message || "Image generation failed."
 
     });
 
@@ -198,89 +232,207 @@ app.post("/api/generate-image", async (req, res) => {
 
 });
 
+/*
+
+  TEXT TO VIDEO
+
+*/
+
 app.post("/api/generate-video", async (req, res) => {
 
   try {
 
-    const { prompt, imageUrl } = req.body;
+    const prompt = String(
 
-    if (!prompt || !prompt.trim()) {
+      req.body.prompt ||
+
+      req.body.promptText ||
+
+      ""
+
+    ).trim();
+
+    if (!prompt) {
 
       return res.status(400).json({
 
-        error: "Prompt is required"
+        error: "Please enter a prompt."
 
       });
 
     }
 
-    const body = {
+    const improvedPrompt = `
+
+${prompt}
+
+Photorealistic live-action footage.
+
+Natural real-world physics and movement.
+
+Realistic lighting, shadows and reflections.
+
+Stable subject appearance throughout the shot.
+
+Natural camera motion.
+
+Cinematic professional camera footage.
+
+Avoid warping, morphing, flickering or unnatural motion.
+
+`.trim();
+
+    const task = await runwayRequest("image_to_video", {
 
       model: "gen4.5",
 
-      promptText: `${prompt.trim()}.
-
-Natural physically believable movement,
-
-realistic camera movement,
-
-stable object geometry,
-
-consistent fine details between frames,
-
-cinematic live-action footage,
-
-realistic lighting and reflections,
-
-natural motion blur,
-
-no morphing,
-
-no warping,
-
-no cartoon appearance,
-
-no CGI appearance.`,
+      promptText: improvedPrompt,
 
       ratio: "1280:720",
 
       duration: 5
 
-    };
+    });
 
-    if (imageUrl) {
-
-      body.promptImage = imageUrl;
-
-    }
-
-    const task = await runwayRequest(
-
-      "image_to_video",
-
-      body
-
-    );
-
-    const result = await waitForTask(task.id);
+    const videoUrl = await waitForTask(task.id);
 
     res.json({
 
-      url: result.output?.[0]
+      success: true,
+
+      url: videoUrl,
+
+      videoUrl: videoUrl,
+
+      output: [videoUrl]
 
     });
 
   } catch (error) {
 
-    console.error(error);
+    console.error("Video generation error:", error);
 
     res.status(500).json({
 
-      error:
+      error: error.message || "Video generation failed."
 
-        error.message ||
+    });
 
-        "Video generation failed"
+  }
+
+});
+
+/*
+
+  IMAGE TO VIDEO
+
+*/
+
+app.post("/api/image-to-video", async (req, res) => {
+
+  try {
+
+    const imageUrl =
+
+      req.body.imageUrl ||
+
+      req.body.image ||
+
+      req.body.promptImage;
+
+    const originalPrompt = String(
+
+      req.body.prompt ||
+
+      req.body.promptText ||
+
+      ""
+
+    ).trim();
+
+    if (!imageUrl) {
+
+      return res.status(400).json({
+
+        error: "An image is required."
+
+      });
+
+    }
+
+    /*
+
+      This prompt tells Gen-4.5 to preserve the generated
+
+      image instead of redesigning the subject.
+
+    */
+
+    const motionPrompt = `
+
+${originalPrompt}
+
+Preserve the exact appearance, shape, proportions, color and details of the subject in the source image.
+
+Create photorealistic live-action footage with realistic physical movement.
+
+Keep the subject consistent and stable throughout the entire shot.
+
+Use natural acceleration and realistic wheel, body and environmental motion when applicable.
+
+The background should move with correct perspective and parallax.
+
+Natural sunlight, physically realistic shadows and reflections.
+
+Smooth professional tracking camera movement with subtle natural camera motion.
+
+Maintain realistic depth of field and photographic detail.
+
+Do not redesign the subject.
+
+Do not change its shape or color.
+
+Avoid morphing, warping, flickering, floating, sliding or rubbery motion.
+
+Avoid artificial CGI-looking movement.
+
+`.trim();
+
+    const task = await runwayRequest("image_to_video", {
+
+      model: "gen4.5",
+
+      promptImage: imageUrl,
+
+      promptText: motionPrompt,
+
+      ratio: "1280:720",
+
+      duration: 5
+
+    });
+
+    const videoUrl = await waitForTask(task.id);
+
+    res.json({
+
+      success: true,
+
+      url: videoUrl,
+
+      videoUrl: videoUrl,
+
+      output: [videoUrl]
+
+    });
+
+  } catch (error) {
+
+    console.error("Image-to-video error:", error);
+
+    res.status(500).json({
+
+      error: error.message || "Image-to-video generation failed."
 
     });
 
@@ -290,10 +442,6 @@ no CGI appearance.`,
 
 app.listen(PORT, () => {
 
-  console.log(
-
-    `MotionPix AI is running on port ${PORT}`
-
-  );
+  console.log(`MotionPix AI is running on port ${PORT}`);
 
 });
