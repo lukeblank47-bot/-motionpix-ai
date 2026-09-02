@@ -482,6 +482,143 @@ app.post("/api/generate-sound", async (req, res) => {
 
   }
 
+  const fs = require("fs");
+
+const { spawn } = require("child_process");
+
+const ffmpegPath = require("ffmpeg-static");
+
+const generatedDir = path.join(__dirname, "generated");
+
+if (!fs.existsSync(generatedDir)) {
+
+  fs.mkdirSync(generatedDir, { recursive: true });
+
+}
+
+async function downloadFile(url, filePath) {
+
+  const response = await fetch(url);
+
+  if (!response.ok) {
+
+    throw new Error("Could not download generated media.");
+
+  }
+
+  const buffer = Buffer.from(await response.arrayBuffer());
+
+  fs.writeFileSync(filePath, buffer);
+
+}
+
+async function combineVideoAndAudio(videoUrl, audioUrl) {
+
+  const id =
+
+    Date.now() + "-" + Math.random().toString(36).slice(2, 8);
+
+  const videoPath = path.join(
+
+    generatedDir,
+
+    `${id}-video.mp4`
+
+  );
+
+  const audioPath = path.join(
+
+    generatedDir,
+
+    `${id}-audio.mp3`
+
+  );
+
+  const outputName = `${id}-final.mp4`;
+
+  const outputPath = path.join(generatedDir, outputName);
+
+  await downloadFile(videoUrl, videoPath);
+
+  await downloadFile(audioUrl, audioPath);
+
+  await new Promise((resolve, reject) => {
+
+    const ffmpeg = spawn(ffmpegPath, [
+
+      "-y",
+
+      "-i",
+
+      videoPath,
+
+      "-i",
+
+      audioPath,
+
+      "-c:v",
+
+      "copy",
+
+      "-c:a",
+
+      "aac",
+
+      "-shortest",
+
+      outputPath
+
+    ]);
+
+    let errorText = "";
+
+    ffmpeg.stderr.on("data", (data) => {
+
+      errorText += data.toString();
+
+    });
+
+    ffmpeg.on("close", (code) => {
+
+      if (code === 0) {
+
+        resolve();
+
+      } else {
+
+        reject(
+
+          new Error(
+
+            "Could not attach sound to video: " + errorText
+
+          )
+
+        );
+
+      }
+
+    });
+
+    ffmpeg.on("error", reject);
+
+  });
+
+  try {
+
+    fs.unlinkSync(videoPath);
+
+    fs.unlinkSync(audioPath);
+
+  } catch (error) {
+
+    console.log("Temporary file cleanup skipped.");
+
+  }
+
+  return `/generated/${outputName}`;
+
+}
 });
 app.listen(PORT, () => {
 
