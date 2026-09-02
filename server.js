@@ -422,7 +422,67 @@ Avoid warping, morphing, flickering or CGI-looking movement.
   }
 
 });
+/*
 
+  AI SOUND EFFECTS
+
+*/
+
+app.post("/api/generate-sound", async (req, res) => {
+
+  try {
+
+    const prompt = String(req.body.prompt || "").trim();
+
+    if (!prompt) {
+
+      return res.status(400).json({
+
+        error: "Please enter a prompt."
+
+      });
+
+    }
+
+    const soundPrompt =
+
+      `Realistic sound effects and natural ambience matching this scene: ${prompt}. No narration or music unless requested.`;
+
+    const task = await runwayRequest("sound_effect", {
+
+      model: "eleven_text_to_sound_v2",
+
+      promptText: soundPrompt,
+
+      duration: 5
+
+    });
+
+    const audioUrl = await waitForTask(task.id);
+
+    res.json({
+
+      success: true,
+
+      url: audioUrl,
+
+      audioUrl: audioUrl
+
+    });
+
+  } catch (error) {
+
+    console.error("Sound generation error:", error);
+
+    res.status(500).json({
+
+      error: error.message || "Sound generation failed."
+
+    });
+
+  }
+
+});
 app.listen(PORT, () => {
 
   console.log(`MotionPix AI is running on port ${PORT}`);
