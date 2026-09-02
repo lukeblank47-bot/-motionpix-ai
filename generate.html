@@ -499,79 +499,11 @@ function showVideo(url) {
   video.controls = true;
 
   video.autoplay = true;
+video.playsInline = true;
 
-  video.playsInline = true;
+result.appendChild(video);  
 
-  result.appendChild(video);
-  const soundButton = document.createElement("button");
-
-soundButton.textContent = "🔊 Add AI Sound";
-
-soundButton.className = "video-btn";
-
-result.appendChild(soundButton);
- soundButton.addEventListener("click", async () => {
-
-  soundButton.disabled = true;
-
-  soundButton.textContent = "🔊 Generating sound...";
-
-  try {
-
-    const res = await fetch("/api/generate-sound", {
-
-      method: "POST",
-
-      headers: {
-
-        "Content-Type": "application/json"
-
-      },
-
-      body: JSON.stringify({
-
-        prompt:document.getElementById("prompt").value.trim(),
-
-        duration: 5
-
-      })
-
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-
-      throw new Error(data.error || "Sound generation failed");
-
-    }
-
-    const audio = document.createElement("audio");
-
-    audio.src = data.url;
-
-    audio.controls = true;
-
-    audio.autoplay = true;
-
-    result.appendChild(audio);
-
-    soundButton.textContent = "✅ Sound Ready";
-
-  } catch (error) {
-
-    soundButton.textContent = "❌ Sound Failed";
-
-    alert(error.message);
-
-  } finally {
-
-    soundButton.disabled = false;
-
-  }
-
-}); 
-
+  
 }
 
 </script>
