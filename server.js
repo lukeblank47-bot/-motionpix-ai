@@ -480,7 +480,7 @@ app.post("/api/generate-sound", async (req, res) => {
 
     });
 
-  }
+  });
 
   const fs = require("fs");
 
