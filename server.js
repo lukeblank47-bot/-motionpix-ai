@@ -624,7 +624,51 @@ async function combineVideoAndAudio(videoUrl, audioUrl) {
 
 }
 
-  
+  app.post("/api/combine-audio", async (req, res) => {
+
+  try {
+
+    const { videoUrl, audioUrl } = req.body || {};
+
+    if (!videoUrl || !audioUrl) {
+
+      return res.status(400).json({
+
+        error: "Missing videoUrl or audioUrl"
+
+      });
+
+    }
+
+    const finalUrl = await combineVideoAndAudio(
+
+      videoUrl,
+
+      audioUrl
+
+    );
+
+    res.json({
+
+      success: true,
+
+      url: finalUrl
+
+    });
+
+  } catch (error) {
+
+    console.error("Combine audio error:", error);
+
+    res.status(500).json({
+
+      error: error.message || "Failed to combine audio and video"
+
+    });
+
+  }
+
+});
 app.listen(PORT, () => {
 
   console.log(`MotionPix AI is running on port ${PORT}`);
