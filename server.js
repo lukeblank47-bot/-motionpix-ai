@@ -477,14 +477,14 @@ app.post("/api/generate-sound", async (req, res) => {
     res.status(500).json({
 
       error: error.message || "Sound generation failed."
-    }); 
     }
     });
-    }
     });
+    
+
+
     
   
-    
 
   const fs = require("fs");
 
