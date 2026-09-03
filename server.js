@@ -311,7 +311,97 @@ Avoid warping, morphing, flickering or unnatural motion.
   } catch (error) {
 
     console.error("Video generation error:", error);
+app.post("/api/image-to-video", async (req, res) => {
 
+  try {
+
+    const imageUrl =
+
+      req.body.imageUrl ||
+
+      req.body.image ||
+
+      req.body.promptImage;
+
+    const originalPrompt = String(
+
+      req.body.prompt ||
+
+      req.body.promptText ||
+
+      ""
+
+    ).trim();
+
+    const duration =
+
+      Number(req.body.duration) === 10 ? 10 : 5;
+
+    if (!imageUrl) {
+
+      return res.status(400).json({
+
+        error: "An image is required."
+
+      });
+
+    }
+
+    const motionPrompt = `
+
+${originalPrompt}
+
+Create a realistic ${duration}-second live-action video.
+
+Keep the subject exactly the same.
+
+Use natural movement, lighting, shadows and camera motion.
+
+Avoid warping, morphing, flickering or CGI-looking movement.
+
+`.trim();
+
+    const task = await runwayRequest("image_to_video", {
+
+      model: "gen4.5",
+
+      promptImage: imageUrl,
+
+      promptText: motionPrompt,
+
+      ratio: "1280:720",
+
+      duration: duration
+
+    });
+
+    const videoUrl = await waitForTask(task.id);
+
+    res.json({
+
+      success: true,
+
+      url: videoUrl,
+
+      videoUrl: videoUrl,
+
+      output: [videoUrl]
+
+    });
+
+  } catch (error) {
+
+    console.error("Image-to-video error:", error);
+
+    res.status(500).json({
+
+      error: error.message || "Image-to-video generation failed."
+
+    });
+
+  }
+
+});
     res.status(500).json({
 
       error: error.message || "Video generation failed."
