@@ -484,26 +484,33 @@ async function turnImageIntoVideo() {
 
 }
 
-function showVideo(url) {
 
-  const result = document.getElementById("result");
+async function showVideo(url) {
 
-  result.style.display = "block";
+const p=document.getElementById("prompt").value;
 
-  result.innerHTML = "";
+try{
 
-  const video = document.createElement("video");
+const a=await requestGeneration("/api/generate-sound",{prompt:p});
 
-  video.src = url;
+url=await requestGeneration("/api/combine-audio",{videoUrl:url,audioUrl:a});
 
-  video.controls = true;
+}catch(e){alert("Sound error: "+e.message);}
 
-  video.autoplay = true;
-video.playsInline = true;
+const r=document.getElementById("result");
 
-result.appendChild(video);  
+r.innerHTML="";
 
-  
+const v=document.createElement("video");
+
+v.src=url;
+
+v.controls=true;
+
+v.playsInline=true;
+
+r.appendChild(v);
+
 }
 
 </script>
