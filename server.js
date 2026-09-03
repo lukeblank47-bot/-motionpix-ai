@@ -478,9 +478,12 @@ app.post("/api/generate-sound", async (req, res) => {
 
       error: error.message || "Sound generation failed."
 
+    
+    }
     });
 
-  });
+
+    
 
   const fs = require("fs");
 
@@ -619,7 +622,8 @@ async function combineVideoAndAudio(videoUrl, audioUrl) {
   return `/generated/${outputName}`;
 
 }
-});
+
+  
 app.listen(PORT, () => {
 
   console.log(`MotionPix AI is running on port ${PORT}`);
